@@ -12,6 +12,10 @@ export default {
         exosphere: "#FFFFFA",
         "dark-matter": "#121D26",
         stratosphere: "#C6D4DC",
+        // Same hue as tulip, darkened/saturated enough for white text (~5:1
+        // contrast) — tulip itself is too light a pastel for that.
+        coral: "#C34122",
+        "coral-dark": "#9C3016",
       },
       fontFamily: {
         display: ["Altivo", "DM Sans", "system-ui", "sans-serif"],

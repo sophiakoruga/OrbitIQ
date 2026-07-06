@@ -55,9 +55,9 @@ export function CompanionCustomizer({ config, onChange }: CompanionCustomizerPro
   return (
     <div className="flex flex-col gap-2.5">
       <span className="font-body text-xs font-semibold uppercase tracking-wide text-dark-matter/60">
-        Suit Color
+        Companion
       </span>
-      <div className="flex flex-wrap gap-3" role="radiogroup" aria-label="Suit Color">
+      <div className="flex flex-wrap gap-3" role="radiogroup" aria-label="Companion">
         {SUIT_PRESETS.map((preset) => (
           <SwatchButton
             key={preset.id}

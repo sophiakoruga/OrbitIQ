@@ -1,6 +1,10 @@
-import { useEffect, useState } from "react";
+import { AnimatePresence } from "framer-motion";
+import { useState } from "react";
 import { Badge } from "../components/Badge";
+import { Modal } from "../components/Modal";
 import { SectionCard } from "../components/SectionCard";
+import { Toast } from "../components/Toast";
+import { Toggle } from "../components/Toggle";
 import { CompanionCustomizer } from "../companion/CompanionCustomizer";
 import { CompanionMascot } from "../companion/CompanionMascot";
 import { useCompanion } from "../companion/useCompanion";
@@ -20,24 +24,24 @@ interface ProfilePageProps {
 export function ProfilePage({ data, onSave, onBack, onRestartOnboarding }: ProfilePageProps) {
   const [name, setName] = useState(data.name);
   const [email, setEmail] = useState(data.email);
-  const [justSaved, setJustSaved] = useState(false);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [showRestartConfirm, setShowRestartConfirm] = useState(false);
   const { companion, updateCompanion } = useCompanion();
-
-  useEffect(() => {
-    if (!justSaved) return;
-    const timeout = setTimeout(() => setJustSaved(false), 2000);
-    return () => clearTimeout(timeout);
-  }, [justSaved]);
 
   const emailTouched = email.length > 0;
   const emailError =
     emailTouched && !isValidEmail(email) ? "Enter a valid email address." : undefined;
-  const canSave = name.trim().length > 0 && isValidEmail(email);
+  const hasChanges = name.trim() !== data.name.trim() || email.trim() !== data.email.trim();
+  const canSave = hasChanges && name.trim().length > 0 && isValidEmail(email);
 
   function handleSave() {
     if (!canSave) return;
     onSave({ ...data, name: name.trim(), email: email.trim() });
-    setJustSaved(true);
+    setToastMessage("Profile updated successfully.");
+  }
+
+  function handleToggleAnalytics(checked: boolean) {
+    onSave({ ...data, analyticsConsent: checked });
   }
 
   return (
@@ -65,7 +69,7 @@ export function ProfilePage({ data, onSave, onBack, onRestartOnboarding }: Profi
         }
       />
 
-      <div className="flex w-full flex-1 flex-col gap-5 px-6 py-8">
+      <div className="flex w-full flex-1 flex-col gap-7 px-6 py-8">
         <div>
           <h1 className="font-display text-2xl font-bold leading-tight text-dark-matter">
             Your Profile
@@ -82,6 +86,7 @@ export function ProfilePage({ data, onSave, onBack, onRestartOnboarding }: Profi
               name="profile-name"
               autoComplete="name"
               align="left"
+              placeholder="Name"
               value={name}
               onChange={(event) => setName(event.target.value)}
             />
@@ -91,6 +96,7 @@ export function ProfilePage({ data, onSave, onBack, onRestartOnboarding }: Profi
               type="email"
               autoComplete="email"
               align="left"
+              placeholder="Email address"
               value={email}
               onChange={(event) => setEmail(event.target.value)}
               error={emailError}
@@ -99,11 +105,6 @@ export function ProfilePage({ data, onSave, onBack, onRestartOnboarding }: Profi
               <PillButton variant="primary" onClick={handleSave} disabled={!canSave}>
                 Save changes
               </PillButton>
-              {justSaved && (
-                <span role="status" className="font-body text-sm text-dark-matter/60">
-                  Saved!
-                </span>
-              )}
             </div>
           </div>
         </SectionCard>
@@ -118,7 +119,7 @@ export function ProfilePage({ data, onSave, onBack, onRestartOnboarding }: Profi
               stack the two columns instead of sitting side by side. */}
           <div className="flex items-center gap-4">
             <div className="shrink-0">
-              <CompanionMascot config={companion} size="lg" />
+              <CompanionMascot config={companion} size="md" />
             </div>
             <div className="min-w-0 flex-1">
               <CompanionCustomizer config={companion} onChange={updateCompanion} />
@@ -132,7 +133,7 @@ export function ProfilePage({ data, onSave, onBack, onRestartOnboarding }: Profi
               data.aiUsage.map((usage) => <Badge key={usage}>{usage}</Badge>)
             ) : (
               <p className="font-body text-sm text-dark-matter/50">
-                No AI usage preferences selected yet.
+                No AI workflow selected yet.
               </p>
             )}
           </div>
@@ -144,7 +145,7 @@ export function ProfilePage({ data, onSave, onBack, onRestartOnboarding }: Profi
               data.platforms.map((platform) => <Badge key={platform}>{platform}</Badge>)
             ) : (
               <p className="font-body text-sm text-dark-matter/50">
-                Choose your favorite AI platforms.
+                No favorite AI platforms selected.
               </p>
             )}
           </div>
@@ -155,7 +156,9 @@ export function ProfilePage({ data, onSave, onBack, onRestartOnboarding }: Profi
             {data.goals.length > 0 ? (
               data.goals.map((goal) => <Badge key={goal}>{goal}</Badge>)
             ) : (
-              <p className="font-body text-sm text-dark-matter/50">No goals configured.</p>
+              <p className="font-body text-sm text-dark-matter/50">
+                No productivity goals selected.
+              </p>
             )}
           </div>
         </SectionCard>
@@ -164,13 +167,17 @@ export function ProfilePage({ data, onSave, onBack, onRestartOnboarding }: Profi
           <div className="flex flex-col gap-4">
             <div className="flex items-center justify-between gap-3">
               <span className="font-body text-sm text-dark-matter/80">Usage analytics</span>
-              <Badge>{data.analyticsConsent ? "Enabled" : "Not enabled"}</Badge>
+              <Toggle
+                checked={data.analyticsConsent}
+                onChange={handleToggleAnalytics}
+                label="Usage analytics"
+              />
             </div>
             <button
               type="button"
-              onClick={onRestartOnboarding}
-              className="self-start font-body text-sm font-medium text-dark-matter/50 underline-offset-2 transition-colors
-                hover:text-dark-matter hover:underline
+              onClick={() => setShowRestartConfirm(true)}
+              className="self-start font-body text-sm font-medium text-boysenberry/70 underline-offset-2 transition-colors
+                hover:text-boysenberry hover:underline
                 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-boysenberry"
             >
               Restart onboarding
@@ -178,6 +185,37 @@ export function ProfilePage({ data, onSave, onBack, onRestartOnboarding }: Profi
           </div>
         </SectionCard>
       </div>
+
+      <AnimatePresence>
+        {toastMessage && (
+          <Toast message={toastMessage} onDismiss={() => setToastMessage(null)} />
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {showRestartConfirm && (
+          <Modal
+            titleId="restart-onboarding-title"
+            title="Restart onboarding?"
+            onClose={() => setShowRestartConfirm(false)}
+            actions={
+              <>
+                <PillButton variant="secondary" onClick={() => setShowRestartConfirm(false)}>
+                  Cancel
+                </PillButton>
+                <PillButton variant="destructive" onClick={onRestartOnboarding}>
+                  Restart
+                </PillButton>
+              </>
+            }
+          >
+            <p className="font-body text-sm text-dark-matter/70">
+              This will take you back through setup and clear your current profile answers. Your
+              account itself won't be deleted.
+            </p>
+          </Modal>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

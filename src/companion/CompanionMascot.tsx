@@ -4,11 +4,14 @@ import type { CompanionConfig } from "./companion";
 
 interface CompanionMascotProps {
   config: CompanionConfig;
-  size?: "sm" | "lg";
+  size?: "sm" | "md" | "lg";
 }
 
 const SIZES = {
   lg: { width: 144, height: 198 },
+  // ~11% smaller than lg — used where the mascot sits alongside the
+  // companion picker so it doesn't dominate the row.
+  md: { width: 128, height: 176 },
   sm: { width: 78, height: 107 },
 };
 

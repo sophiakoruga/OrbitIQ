@@ -19,10 +19,10 @@ export function WelcomeScreen({ headingRef, onSignIn, onCreateAccount }: Welcome
         </h1>
         <Mascot type="astronaut" />
         <div className="flex w-full max-w-[12rem] flex-col items-center gap-4">
-          <PillButton variant="neutral" fullWidth onClick={onSignIn}>
+          <PillButton variant="secondary" icon="none" fullWidth onClick={onSignIn}>
             Sign in
           </PillButton>
-          <PillButton variant="neutral" fullWidth onClick={onCreateAccount}>
+          <PillButton variant="primary" icon="none" fullWidth onClick={onCreateAccount}>
             Create an account
           </PillButton>
         </div>

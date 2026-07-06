@@ -37,7 +37,7 @@ export function LoadingScreen({ headingRef, onGoToDashboard }: LoadingScreenProp
           Building your personalized dashboard...
         </h1>
         <LoadingDots reduceMotion={Boolean(shouldReduceMotion)} />
-        <PillButton variant="neutral" onClick={onGoToDashboard}>
+        <PillButton variant="primary" icon="none" onClick={onGoToDashboard}>
           Go to dashboard
         </PillButton>
       </div>

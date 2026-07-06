@@ -23,11 +23,11 @@ export function TextField({
   const isLeft = align === "left";
 
   return (
-    <div className={`flex w-full flex-col gap-2 ${isLeft ? "items-start" : "items-center"}`}>
+    <div className={`flex w-full flex-col ${isLeft ? "gap-2.5 items-start" : "gap-2 items-center"}`}>
       <label
         htmlFor={fieldId}
-        className={`w-full font-body text-lg font-bold uppercase text-dark-matter ${
-          isLeft ? "text-left" : "text-center"
+        className={`w-full font-body font-bold uppercase text-dark-matter ${
+          isLeft ? "text-left text-[15px]" : "text-center text-lg"
         }`}
       >
         {label}
@@ -35,7 +35,8 @@ export function TextField({
       <input
         id={fieldId}
         className={`h-11 w-full rounded-full border border-dark-matter bg-transparent px-4
-          font-body text-base text-dark-matter
+          font-body text-base text-dark-matter transition-colors duration-150
+          focus:border-boysenberry
           focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-boysenberry
           aria-[invalid=true]:border-red-600
           ${className}`}
