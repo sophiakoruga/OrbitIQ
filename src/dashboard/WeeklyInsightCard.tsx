@@ -2,18 +2,20 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useState } from "react";
 import type { OnboardingData } from "../onboarding/types";
 import { LightbulbIcon } from "./LightbulbIcon";
-import { getWeeklyInsightDetails } from "./widgetDetails";
+import { getWeeklyInsightRecommendations, pickRandomWeeklyInsight } from "./widgetDetails";
 
 interface WeeklyInsightCardProps {
   id: string;
-  sentence: string;
   data: OnboardingData;
   animationDelayMs?: number;
 }
 
-export function WeeklyInsightCard({ id, sentence, data, animationDelayMs = 0 }: WeeklyInsightCardProps) {
+export function WeeklyInsightCard({ id, data, animationDelayMs = 0 }: WeeklyInsightCardProps) {
   const [expanded, setExpanded] = useState(false);
-  const details = getWeeklyInsightDetails(data);
+  // Picked once per mount (i.e. once per page load) so it doesn't change
+  // out from under the user on every unrelated re-render.
+  const [insight] = useState(() => pickRandomWeeklyInsight(data));
+  const recommendations = getWeeklyInsightRecommendations(data);
 
   return (
     <motion.div
@@ -22,8 +24,10 @@ export function WeeklyInsightCard({ id, sentence, data, animationDelayMs = 0 }: 
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.25, delay: animationDelayMs / 1000 }}
-      className={`flex flex-col justify-between gap-2 rounded-xl border border-stratosphere bg-white/70 p-4
-        shadow-sm transition-shadow hover:shadow-md ${expanded ? "col-span-2" : "min-h-[128px]"}`}
+      whileHover={{ y: -2, transition: { duration: 0.18 } }}
+      className={`flex cursor-pointer flex-col justify-between gap-2 rounded-xl border border-stratosphere
+        bg-white/70 p-4 shadow-sm transition-shadow duration-[180ms] hover:shadow-md
+        ${expanded ? "col-span-2" : "min-h-[128px]"}`}
     >
       <button
         type="button"
@@ -38,7 +42,7 @@ export function WeeklyInsightCard({ id, sentence, data, animationDelayMs = 0 }: 
             Weekly Insight
           </span>
           <span className="font-body text-sm font-semibold leading-snug text-dark-matter">
-            {sentence}
+            {insight.sentence}
           </span>
         </div>
         <motion.svg
@@ -74,14 +78,14 @@ export function WeeklyInsightCard({ id, sentence, data, animationDelayMs = 0 }: 
                 <span className="font-body text-xs font-semibold uppercase tracking-wide text-dark-matter/50">
                   Summary
                 </span>
-                <p className="mt-1 font-body text-sm text-dark-matter/80">{details.summary}</p>
+                <p className="mt-1 font-body text-sm text-dark-matter/80">{insight.detail}</p>
               </div>
               <div>
                 <span className="font-body text-xs font-semibold uppercase tracking-wide text-dark-matter/50">
                   Recommendations
                 </span>
                 <ul className="mt-1.5 flex flex-col gap-1.5">
-                  {details.recommendations.map((recommendation) => (
+                  {recommendations.map((recommendation) => (
                     <li
                       key={recommendation}
                       className="flex gap-2 font-body text-sm text-dark-matter/80"

@@ -172,9 +172,9 @@ export function getPlatformPieData(data: OnboardingData) {
   }));
 }
 
-export interface WeeklyInsightDetails {
-  summary: string;
-  recommendations: string[];
+export interface WeeklyInsightPick {
+  sentence: string;
+  detail: string;
 }
 
 const PLATFORM_STRENGTHS: Record<string, string> = {
@@ -185,26 +185,40 @@ const PLATFORM_STRENGTHS: Record<string, string> = {
   Other: "specialized workflows",
 };
 
-function buildInsightSummary(data: OnboardingData, magnitude: number): string {
-  const [firstPlatform, secondPlatform] = data.platforms;
-  const [firstUsage, secondUsage] = data.aiUsage;
+/**
+ * A fresh pick each time it's called (true Math.random, not the seeded
+ * helper used elsewhere) — callers are expected to call this once per
+ * mount and hold onto the result, so it rotates on page refresh rather
+ * than on every re-render.
+ */
+export function pickRandomWeeklyInsight(data: OnboardingData): WeeklyInsightPick {
+  const topPlatform = getAiSessionsDetails(data).platforms[0];
+  const longestStreak = getFocusStreakDetails(data).longest;
+  const switchReduction = 10 + Math.floor(Math.random() * 16);
 
-  let platformClause: string;
-  if (firstPlatform && secondPlatform) {
-    const secondaryTask = (secondUsage ?? firstUsage ?? "technical work").toLowerCase();
-    const primaryTask = (firstUsage ?? "brainstorming").toLowerCase();
-    platformClause = `You relied on ${secondPlatform} for ${secondaryTask} while ${firstPlatform} was primarily used for ${primaryTask}.`;
-  } else if (firstPlatform) {
-    const task = (firstUsage ?? "everyday tasks").toLowerCase();
-    platformClause = `You leaned on ${firstPlatform} for ${task} this week.`;
-  } else {
-    platformClause = "You explored a mix of AI tools this week.";
-  }
+  const pool: WeeklyInsightPick[] = [
+    {
+      sentence: `You saved approximately ${TIME_SAVED_WEEK_HOURS} hours this week.`,
+      detail: `Based on your usual tasks, we estimate you saved about ${TIME_SAVED_WEEK_HOURS} hours this week by using AI instead of doing it manually.`,
+    },
+    {
+      sentence: `${topPlatform.label} handled ${topPlatform.percent}% of your sessions.`,
+      detail: `${topPlatform.label} was your most-used platform this week, handling ${topPlatform.percent}% of your AI sessions.`,
+    },
+    {
+      sentence: `Your longest focus streak was ${longestStreak} days.`,
+      detail: `Your best stretch of consistent, intentional AI use lasted ${longestStreak} days in a row.`,
+    },
+    {
+      sentence: `You reduced switching between AI tools by ${switchReduction}%.`,
+      detail: `You stuck with one tool per task ${switchReduction}% more often this week, cutting down on context-switching.`,
+    },
+  ];
 
-  return `${platformClause} Your prompts became ${magnitude}% shorter this week, saving approximately ${TIME_SAVED_WEEK_HOURS} hours.`;
+  return pool[Math.floor(Math.random() * pool.length)];
 }
 
-function buildRecommendations(data: OnboardingData): string[] {
+export function getWeeklyInsightRecommendations(data: OnboardingData): string[] {
   const [firstPlatform, secondPlatform] = data.platforms;
   const recommendations: string[] = ["Try using reusable prompt templates for repeat tasks."];
 
@@ -217,14 +231,4 @@ function buildRecommendations(data: OnboardingData): string[] {
   recommendations.push("Reduce prompt length — shorter, focused prompts tend to get better first answers.");
 
   return recommendations.slice(0, 4);
-}
-
-export function getWeeklyInsightDetails(data: OnboardingData): WeeklyInsightDetails {
-  const seed = seedFrom(data.name + (data.goals[0] ?? ""));
-  const magnitude = 10 + (seed % 21);
-
-  return {
-    summary: buildInsightSummary(data, magnitude),
-    recommendations: buildRecommendations(data),
-  };
 }

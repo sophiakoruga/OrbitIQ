@@ -39,9 +39,9 @@ export function Modal({ titleId, title, onClose, children, actions }: ModalProps
         aria-modal="true"
         aria-labelledby={titleId}
         tabIndex={-1}
-        initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 12, scale: 0.98 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
-        exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 8, scale: 0.98 }}
+        initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.95 }}
         transition={{ duration: 0.2, ease: "easeOut" }}
         className="relative max-h-[calc(100vh-2rem)] w-full max-w-sm overflow-y-auto rounded-2xl bg-exosphere p-6
           shadow-2xl outline-none"

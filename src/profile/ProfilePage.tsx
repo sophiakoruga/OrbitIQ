@@ -81,6 +81,7 @@ export function ProfilePage({ data, onSave, onBack, onRestartOnboarding }: Profi
               label="Name"
               name="profile-name"
               autoComplete="name"
+              align="left"
               value={name}
               onChange={(event) => setName(event.target.value)}
             />
@@ -89,6 +90,7 @@ export function ProfilePage({ data, onSave, onBack, onRestartOnboarding }: Profi
               name="profile-email"
               type="email"
               autoComplete="email"
+              align="left"
               value={email}
               onChange={(event) => setEmail(event.target.value)}
               error={emailError}
@@ -110,11 +112,15 @@ export function ProfilePage({ data, onSave, onBack, onRestartOnboarding }: Profi
           title="Your Orbit Companion"
           description="Customize your companion — it shows up on your dashboard and throughout the app."
         >
-          <div className="flex flex-col items-center gap-5 sm:flex-row sm:items-start">
-            <div className="flex shrink-0 justify-center sm:justify-start">
+          {/* Always a row, never stacked — this card only ever renders at the
+              ~440px panel width, which is narrower than Tailwind's `sm`
+              breakpoint, so a viewport-based breakpoint here would silently
+              stack the two columns instead of sitting side by side. */}
+          <div className="flex items-center gap-4">
+            <div className="shrink-0">
               <CompanionMascot config={companion} size="lg" />
             </div>
-            <div className="w-full">
+            <div className="min-w-0 flex-1">
               <CompanionCustomizer config={companion} onChange={updateCompanion} />
             </div>
           </div>

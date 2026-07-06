@@ -1,6 +1,7 @@
 import { motion, useReducedMotion } from "framer-motion";
 import { useEffect, type RefObject } from "react";
-import { Mascot } from "../components/Mascot";
+import { CompanionMascot } from "../../companion/CompanionMascot";
+import { useCompanion } from "../../companion/useCompanion";
 import { OnboardingHeader } from "../components/OnboardingHeader";
 import { PillButton } from "../components/PillButton";
 
@@ -13,6 +14,7 @@ const AUTO_ADVANCE_MS = 1800;
 
 export function LoadingScreen({ headingRef, onGoToDashboard }: LoadingScreenProps) {
   const shouldReduceMotion = useReducedMotion();
+  const { companion } = useCompanion();
 
   // Feels like a premium product completing setup on its own — the button
   // stays as a manual skip-ahead for anyone who doesn't want to wait.
@@ -26,7 +28,7 @@ export function LoadingScreen({ headingRef, onGoToDashboard }: LoadingScreenProp
     <div className="flex min-h-full w-full flex-col items-center bg-exosphere">
       <OnboardingHeader />
       <div className="flex w-full flex-1 flex-col items-center justify-center gap-8 px-6 py-10">
-        <Mascot type="dog" />
+        <CompanionMascot config={companion} size="lg" />
         <h1
           ref={headingRef}
           tabIndex={-1}

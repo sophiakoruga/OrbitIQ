@@ -4,7 +4,7 @@ export function TrendBadge({ trend }: { trend: WidgetTrend }) {
   const isUp = trend.direction === "up";
   return (
     <span
-      className="inline-flex items-center gap-1 font-body text-xs font-semibold"
+      className="inline-flex items-center gap-1 font-body text-xs font-medium opacity-80"
       style={{ color: isUp ? "#1F7A52" : "#B54B3C" }}
     >
       <svg viewBox="0 0 12 12" fill="none" aria-hidden="true" className="size-3">
@@ -16,8 +16,7 @@ export function TrendBadge({ trend }: { trend: WidgetTrend }) {
           strokeLinejoin="round"
         />
       </svg>
-      {isUp ? "+" : "-"}
-      {trend.delta} {trend.label}
+      {trend.delta} points {trend.label}
     </span>
   );
 }

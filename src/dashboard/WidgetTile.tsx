@@ -33,10 +33,11 @@ export function WidgetTile({
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.25, delay: animationDelayMs / 1000 }}
-      whileHover={{ y: -2 }}
+      whileHover={{ y: -2, transition: { duration: 0.18 } }}
       whileTap={{ scale: 0.98 }}
-      className="flex min-h-[128px] flex-col items-start justify-between gap-1 rounded-xl border border-stratosphere
-        bg-white/70 p-4 text-left shadow-sm transition-shadow duration-200 hover:border-boysenberry/40 hover:shadow-md
+      className="flex min-h-[128px] cursor-pointer flex-col items-start justify-between gap-1 rounded-xl
+        border border-stratosphere bg-white/70 p-4 text-left shadow-sm transition-shadow duration-[180ms]
+        hover:border-boysenberry/40 hover:shadow-md
         focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-boysenberry"
     >
       <span className="font-body text-xs font-semibold uppercase tracking-wide text-boysenberry/70">
@@ -46,7 +47,7 @@ export function WidgetTile({
         {animatedValue}
       </span>
       {(caption || trend) && (
-        <div className="flex items-center gap-2">
+        <div className="flex flex-col gap-0.5">
           {caption && <span className="font-body text-xs text-dark-matter/60">{caption}</span>}
           {trend && <TrendBadge trend={trend} />}
         </div>

@@ -53,32 +53,6 @@ export function seedFrom(input: string): number {
   return Math.abs(hash);
 }
 
-interface InsightResult {
-  sentence: string;
-  detail: string;
-}
-
-const INSIGHT_TEMPLATES: Array<
-  (topUsage: string, topPlatform: string, magnitude: number) => InsightResult
-> = [
-  (_topUsage, _topPlatform, m) => ({
-    sentence: `You reduced prompt length by ${m}% this week.`,
-    detail: `You shortened your prompts by ${m}% this week — a sign you're getting more precise about what you ask for.`,
-  }),
-  (topUsage, topPlatform, m) => ({
-    sentence: `${topPlatform} answered ${m + 70}% of your questions on the first try.`,
-    detail: `${topPlatform} got it right on the first try ${m + 70}% of the time this week, mostly on ${topUsage.toLowerCase()} tasks — fewer follow-ups needed.`,
-  }),
-  (topUsage, _topPlatform, m) => ({
-    sentence: `Your sessions stayed on-topic ${m}% more often this week.`,
-    detail: `Your sessions stayed on-topic ${m}% more often this week, especially around ${topUsage.toLowerCase()}.`,
-  }),
-  (_topUsage, topPlatform, m) => ({
-    sentence: `Your first drafts with ${topPlatform} needed ${m}% less editing.`,
-    detail: `Your first drafts with ${topPlatform} landed closer to what you needed — about ${m}% less editing this week.`,
-  }),
-];
-
 /**
  * All values here are mocked (no real tracking or backend), but are
  * templated and seeded from the user's actual onboarding answers so the
@@ -97,13 +71,6 @@ export function buildWidgets(data: OnboardingData): WidgetContent[] {
   const trendDelta = 2 + (seed % 9);
   const trendDirection: WidgetTrend["direction"] = seed % 5 === 0 ? "down" : "up";
 
-  const insightSeed = seedFrom(data.name + topGoal);
-  const insight = INSIGHT_TEMPLATES[insightSeed % INSIGHT_TEMPLATES.length](
-    topUsage,
-    topPlatform,
-    10 + (insightSeed % 21),
-  );
-
   return [
     {
       id: "orbitScore",
@@ -113,7 +80,7 @@ export function buildWidgets(data: OnboardingData): WidgetContent[] {
       trend: {
         direction: trendDirection,
         delta: trendDelta,
-        label: "this week",
+        label: "from last week",
       },
       detail: `Your Orbit Score blends how often you use AI, how many tools you rely on, and how clear your goals are. It's ${orbitScore}/100 right now — goals like "${topGoal}" from setup helped push it up.`,
       chartData: usageChartSource
@@ -158,11 +125,14 @@ export function buildWidgets(data: OnboardingData): WidgetContent[] {
       detail: `You've had about ${AI_SESSIONS_TOTAL} AI sessions this week, mostly centered around ${topUsage.toLowerCase()}. That's roughly ${Math.round((AI_SESSIONS_TOTAL / 7) * 10) / 10} sessions a day.`,
     },
     {
+      // The tile's actual copy is picked at random per page load by
+      // WeeklyInsightCard (see widgetDetails.ts) — this entry only exists
+      // so the id shows up in ordering, visibility, and the tutorial.
       id: "weeklyInsight",
       label: "Weekly Insight",
-      value: insight.sentence,
+      value: "",
       caption: "",
-      detail: insight.detail,
+      detail: "",
     },
   ];
 }

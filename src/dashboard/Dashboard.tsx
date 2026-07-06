@@ -2,6 +2,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import { CompanionMascot } from "../companion/CompanionMascot";
 import { useCompanion } from "../companion/useCompanion";
+import { Toast } from "../components/Toast";
 import { OnboardingHeader } from "../onboarding/components/OnboardingHeader";
 import type { OnboardingData } from "../onboarding/types";
 import { readStorage, writeStorage, STORAGE_KEYS } from "../lib/storage";
@@ -37,6 +38,7 @@ export function Dashboard({ data, onOpenProfile }: DashboardProps) {
   );
   const [activeWidgetId, setActiveWidgetId] = useState<WidgetId | null>(null);
   const [showCustomize, setShowCustomize] = useState(false);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [showTutorial, setShowTutorial] = useState(
     () => !readStorage(STORAGE_KEYS.tutorialSeen, false),
   );
@@ -51,9 +53,19 @@ export function Dashboard({ data, onOpenProfile }: DashboardProps) {
     .map((id) => widgets.find((widget) => widget.id === id))
     .filter((widget): widget is NonNullable<typeof widget> => Boolean(widget));
 
-  function handleSaveLayout(next: DashboardLayout) {
+  function handleLiveLayoutChange(next: DashboardLayout) {
     setLayout(next);
     writeStorage(STORAGE_KEYS.dashboardLayout, next);
+  }
+
+  function handleCustomizeConfirm() {
+    setShowCustomize(false);
+    setToastMessage("Dashboard updated.");
+  }
+
+  function handleCustomizeCancel(previousLayout: DashboardLayout) {
+    setLayout(previousLayout);
+    writeStorage(STORAGE_KEYS.dashboardLayout, previousLayout);
     setShowCustomize(false);
   }
 
@@ -134,7 +146,7 @@ export function Dashboard({ data, onOpenProfile }: DashboardProps) {
           </motion.div>
         )}
 
-        <div className="grid grid-cols-2 gap-5">
+        <div className="grid grid-cols-2 gap-6">
           {isLoading ? (
             Array.from({ length: 6 }, (_, index) => <WidgetSkeleton key={index} />)
           ) : (
@@ -145,7 +157,6 @@ export function Dashboard({ data, onOpenProfile }: DashboardProps) {
                     <WeeklyInsightCard
                       key={widget.id}
                       id={`widget-${widget.id}`}
-                      sentence={widget.value}
                       data={data}
                       animationDelayMs={80 + index * 60}
                     />
@@ -193,9 +204,16 @@ export function Dashboard({ data, onOpenProfile }: DashboardProps) {
         {showCustomize && (
           <CustomizeDashboardModal
             layout={layout}
-            onSave={handleSaveLayout}
-            onClose={() => setShowCustomize(false)}
+            onLiveChange={handleLiveLayoutChange}
+            onConfirm={handleCustomizeConfirm}
+            onCancel={handleCustomizeCancel}
           />
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {toastMessage && (
+          <Toast message={toastMessage} onDismiss={() => setToastMessage(null)} />
         )}
       </AnimatePresence>
 
